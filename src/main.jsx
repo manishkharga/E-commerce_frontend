@@ -7,6 +7,7 @@ import guestRoutes from "./routes/guestRoutes";
 import mainRoutes from "./routes/mainRoutes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+
 // Create a client
 const queryClient = new QueryClient();
 

@@ -1,6 +1,6 @@
 import MinimumLayout from "../layout/MinimumLayout";
-import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Login from "../pages/Login.jsx";
 
 const guestRoutes = [
   {
