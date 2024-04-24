@@ -14,6 +14,8 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { Tooltip } from "@mui/material";
 
 const drawerWidth = 240;
 const navItems = [
@@ -103,6 +105,23 @@ const Header = (props) => {
               </Button>
             ))}
           </Box>
+
+          <Typography sx={{ margin: "0 1rem", fontWeight: "bold" }}>
+            Hi, {localStorage.getItem("firstName")}
+          </Typography>
+          <Tooltip title="Logout">
+            <IconButton
+              sx={{ color: "#fff" }}
+              onClick={() => {
+                navigate("/login");
+
+                // clear local storage
+                localStorage.clear();
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <nav>
