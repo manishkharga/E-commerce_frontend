@@ -1,11 +1,39 @@
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { fallbackImage } from "../constants/general.constants";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import $axios from "../lib/axios/axios.instance";
+import DeleteProductDialog from "../component/DeleteProductDialog";
 
 // Box => div
 // Stack => div which has display flex and direction column
 const ProductDetail = () => {
+  const params = useParams();
+  const productId = params?.id;
+
+  //   fetch product details
+  const { isPending, data } = useQuery({
+    queryKey: ["get-product-detail"],
+    queryFn: async () => {
+      return await $axios.get(`/product/details/${productId}`);
+    },
+  });
+
+  const productDetail = data?.data?.productDetail;
+
+  if (isPending) {
+    return <CircularProgress />;
+  }
+
   return (
     <Box
       sx={{
@@ -17,11 +45,17 @@ const ProductDetail = () => {
       }}
     >
       <Box
-        sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minWidth: "50%",
+        }}
       >
         <img
-          src="https://media.istockphoto.com/id/136568907/photo/a-purple-winter-parka-for-a-fashion-image.jpg?s=612x612&w=0&k=20&c=fK2_No3CvQnqIY9ti2giLz2w8IaUmSrptu2iSNxd93g="
+          src={productDetail?.image || fallbackImage}
           alt=""
+          style={{ width: "90%" }}
         />
       </Box>
       <Box
@@ -33,45 +67,35 @@ const ProductDetail = () => {
           gap: "2rem",
         }}
       >
-        <Typography variant="h5">Winter Woolen Jacket</Typography>
+        <Typography variant="h5">{productDetail.name}</Typography>
         <Chip
-          label="Sonam"
+          label={productDetail.brand}
           variant="outlined"
           color="success"
           sx={{ fontSize: "1rem" }}
         />
         <Typography sx={{ textAlign: "justify" }}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Solutrecusandae accusantium dolor aliquam doloremque beatae minima
-          asperiores
+          {productDetail.description}
         </Typography>
-        <Typography variant="h6">Price: $50.50</Typography>
+        <Typography variant="h6">Price: ${productDetail.price}</Typography>
 
         <Chip
           variant="outlined"
           color="success"
-          label="Grocery"
-          sx={{ fontSize: "1rem" }}
+          label={productDetail.category}
+          sx={{ fontSize: "1rem", textTransform: "capitalize" }}
         />
 
-        <Typography variant="h6">Available quantity: 10</Typography>
+        <Typography variant="h6">
+          Available quantity: {productDetail.availableQuantity}
+        </Typography>
 
         <Stack direction="row" spacing={4}>
           <Typography variant="h6">Free shipping</Typography>
           <Chip
             variant="outlined"
             color="success"
-            label="Yes"
+            label={productDetail.freeShipping ? "Yes" : "No"}
             sx={{ fontSize: "1rem" }}
           />
         </Stack>
@@ -85,14 +109,8 @@ const ProductDetail = () => {
           >
             Edit
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            fullWidth
-          >
-            Delete
-          </Button>
+
+          <DeleteProductDialog />
         </Stack>
       </Box>
     </Box>

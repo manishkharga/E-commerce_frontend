@@ -4,6 +4,7 @@ import $axios from "../lib/axios/axios.instance";
 import { Box, Button, CircularProgress } from "@mui/material";
 import ProductCard from "./ProductCard";
 import { useNavigate } from "react-router-dom";
+import SellProductPrompt from "./SellProductPrompt";
 
 const SellerProductList = () => {
   const navigate = useNavigate();
@@ -35,6 +36,8 @@ const SellerProductList = () => {
       >
         add product
       </Button>
+
+      {productList.length === 0 && <SellProductPrompt />}
       <Box
         sx={{
           display: "flex",
