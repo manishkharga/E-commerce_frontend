@@ -3,17 +3,19 @@ import {
   Button,
   Chip,
   CircularProgress,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import { fallbackImage } from "../constants/general.constants";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import $axios from "../lib/axios/axios.instance";
 import DeleteProductDialog from "../component/DeleteProductDialog";
-
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 // Box => div
 // Stack => div which has display flex and direction column
 const ProductDetail = () => {
@@ -34,7 +36,24 @@ const ProductDetail = () => {
 
   const productDetail = data?.data?.productDetail;
 
-  if (isPending) {
+  // ordered quantity tracking
+  const [productCount, setProductCount] = useState(1);
+
+  // add to cart api hit
+  const { isPending: addItemToCartPending, mutate } = useMutation({
+    mutationKey: ["add-item-to-cart"],
+    mutationFn: async () => {
+      return await $axios.post(`/cart/item/add`, {
+        productId: productId,
+        orderedQuantity: productCount,
+      });
+    },
+    onSuccess: () => {
+      navigate("/cart");
+    },
+  });
+
+  if (isPending || addItemToCartPending) {
     return <CircularProgress />;
   }
 
@@ -120,6 +139,41 @@ const ProductDetail = () => {
 
             <DeleteProductDialog />
           </Stack>
+        )}
+
+        {userRole === "buyer" && (
+          <>
+            <Stack direction="row" spacing={3}>
+              <IconButton
+                onClick={() => {
+                  setProductCount((prevCount) => prevCount - 1);
+                }}
+                disabled={productCount === 1}
+              >
+                <RemoveIcon />
+              </IconButton>
+              <Typography variant="h4">{productCount}</Typography>
+              <IconButton
+                onClick={() => {
+                  setProductCount((prevCount) => prevCount + 1);
+                }}
+                disabled={productCount === productDetail?.availableQuantity}
+              >
+                <AddIcon />
+              </IconButton>
+            </Stack>
+
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => {
+                mutate();
+              }}
+              fullWidth
+            >
+              add to cart
+            </Button>
+          </>
         )}
       </Box>
     </Box>

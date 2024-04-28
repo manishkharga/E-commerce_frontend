@@ -15,8 +15,8 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { Tooltip } from "@mui/material";
-
+import { Badge, Tooltip } from "@mui/material";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 const drawerWidth = 240;
 const navItems = [
   {
@@ -40,6 +40,9 @@ const Header = (props) => {
   const navigate = useNavigate();
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  // get user role
+  const userRole = localStorage.getItem("role");
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -104,6 +107,18 @@ const Header = (props) => {
                 {item.name}
               </Button>
             ))}
+            {userRole === "buyer" && (
+              <IconButton
+                sx={{ color: "#fff" }}
+                onClick={() => {
+                  navigate("/cart");
+                }}
+              >
+                <Badge badgeContent={2} color="success">
+                  <ShoppingCartOutlinedIcon />
+                </Badge>
+              </IconButton>
+            )}
           </Box>
 
           <Typography sx={{ margin: "0 1rem", fontWeight: "bold" }}>
