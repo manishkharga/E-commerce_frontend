@@ -5,6 +5,7 @@ import { Box, Button, CircularProgress } from "@mui/material";
 import ProductCard from "./ProductCard";
 import { useNavigate } from "react-router-dom";
 import SellProductPrompt from "./SellProductPrompt";
+import Loader from "./Loader";
 
 const SellerProductList = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const SellerProductList = () => {
   const productList = data?.data?.productList;
 
   if (isPending) {
-    return <CircularProgress />;
+    return <Loader />;
   }
   return (
     <>

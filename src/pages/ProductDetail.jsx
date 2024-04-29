@@ -11,17 +11,22 @@ import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import { fallbackImage } from "../constants/general.constants";
 import { useNavigate, useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import $axios from "../lib/axios/axios.instance";
 import DeleteProductDialog from "../component/DeleteProductDialog";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import Loader from "../component/Loader";
 // Box => div
 // Stack => div which has display flex and direction column
 const ProductDetail = () => {
+  const [orderedQuantity, setOrderedQuantity] = useState(1);
+
   const navigate = useNavigate();
   const params = useParams();
   const productId = params?.id;
+
+  const queryClient = useQueryClient();
 
   // get user role
   const userRole = localStorage.getItem("role");
@@ -36,25 +41,23 @@ const ProductDetail = () => {
 
   const productDetail = data?.data?.productDetail;
 
-  // ordered quantity tracking
-  const [productCount, setProductCount] = useState(1);
-
   // add to cart api hit
   const { isPending: addItemToCartPending, mutate } = useMutation({
     mutationKey: ["add-item-to-cart"],
     mutationFn: async () => {
-      return await $axios.post(`/cart/item/add`, {
-        productId: productId,
-        orderedQuantity: productCount,
+      return await $axios.post("/cart/item/add", {
+        productId,
+        orderedQuantity,
       });
     },
+
     onSuccess: () => {
-      navigate("/cart");
+      queryClient.invalidateQueries("get-cart-item-count");
     },
   });
 
   if (isPending || addItemToCartPending) {
-    return <CircularProgress />;
+    return <Loader />;
   }
 
   return (
@@ -143,33 +146,33 @@ const ProductDetail = () => {
 
         {userRole === "buyer" && (
           <>
-            <Stack direction="row" spacing={3}>
+            {" "}
+            <Stack direction="row" spacing={2}>
               <IconButton
+                disabled={orderedQuantity === 1}
                 onClick={() => {
-                  setProductCount((prevCount) => prevCount - 1);
+                  setOrderedQuantity((prev) => prev - 1);
                 }}
-                disabled={productCount === 1}
               >
                 <RemoveIcon />
               </IconButton>
-              <Typography variant="h4">{productCount}</Typography>
+              <Typography variant="h4">{orderedQuantity}</Typography>
+
               <IconButton
+                disabled={orderedQuantity === productDetail?.availableQuantity}
                 onClick={() => {
-                  setProductCount((prevCount) => prevCount + 1);
+                  setOrderedQuantity((prev) => prev + 1);
                 }}
-                disabled={productCount === productDetail?.availableQuantity}
               >
                 <AddIcon />
               </IconButton>
             </Stack>
-
             <Button
               variant="contained"
               color="success"
               onClick={() => {
                 mutate();
               }}
-              fullWidth
             >
               add to cart
             </Button>
