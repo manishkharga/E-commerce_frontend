@@ -1,7 +1,9 @@
+import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
+import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Button,
   Chip,
-  CircularProgress,
   IconButton,
   LinearProgress,
   Paper,
@@ -14,11 +16,10 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import $axios from "../lib/axios/axios.instance";
-import ClearIcon from "@mui/icons-material/Clear";
-import KeepShopping from "./KeepShopping";
+
 const CartItemTable = ({ cartData }) => {
   const queryClient = useQueryClient();
 
@@ -49,6 +50,23 @@ const CartItemTable = ({ cartData }) => {
     },
   });
 
+  // update quantity api hit
+  const { isPending: updateQuantityPending, mutate: updateQuantityMutate } =
+    useMutation({
+      mutationKey: ["update-cart-item-quantity"],
+      mutationFn: async (values) => {
+        return await $axios.put(
+          `/cart/item/update/quantity/${values.productId}`,
+          {
+            action: values.action,
+          }
+        );
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries("get-cart-item-list");
+      },
+    });
+
   return (
     <TableContainer
       component={Paper}
@@ -58,9 +76,9 @@ const CartItemTable = ({ cartData }) => {
           "rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px",
       }}
     >
-      {(removeSingleItemFromCartPending || clearCartPending) && (
-        <LinearProgress color="success" />
-      )}
+      {(removeSingleItemFromCartPending ||
+        clearCartPending ||
+        updateQuantityPending) && <LinearProgress color="success" />}
       <Button
         variant="contained"
         color="error"
@@ -83,16 +101,16 @@ const CartItemTable = ({ cartData }) => {
             <TableCell align="center">
               <Typography variant="h6">Name</Typography>
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="left">
               <Typography variant="h6">Price</Typography>
             </TableCell>
-            <TableCell align="right">
+            <TableCell align="left">
               <Typography variant="h6">Quantity</Typography>
             </TableCell>
             <TableCell align="left">
               <Typography variant="h6">Sub total</Typography>
             </TableCell>
-            <TableCell align="right">
+            <TableCell align="left">
               <Typography variant="h6">Action</Typography>
             </TableCell>
           </TableRow>
@@ -106,7 +124,7 @@ const CartItemTable = ({ cartData }) => {
               <TableCell component="th" scope="row">
                 <Typography variant="body1"> {index + 1}</Typography>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="center">
                 <img
                   src={item.image}
                   alt={item.name}
@@ -128,17 +146,43 @@ const CartItemTable = ({ cartData }) => {
                   />
                 </Stack>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="left">
                 <Typography variant="body1">${item.unitPrice}</Typography>
               </TableCell>
               <TableCell align="center">
-                <Typography variant="body1">{item.orderedQuantity}</Typography>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <IconButton
+                    disabled={
+                      item.orderedQuantity === 1 || updateQuantityPending
+                    }
+                    onClick={() => {
+                      updateQuantityMutate({
+                        productId: item?.productId,
+                        action: "dec",
+                      });
+                    }}
+                  >
+                    <RemoveIcon />
+                  </IconButton>
+                  <Typography variant="h6">{item.orderedQuantity}</Typography>
+                  <IconButton
+                    disabled={updateQuantityPending}
+                    onClick={() => {
+                      updateQuantityMutate({
+                        productId: item?.productId,
+                        action: "inc",
+                      });
+                    }}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                </Stack>
               </TableCell>
               <TableCell align="center">
                 {" "}
                 <Typography variant="body1">{200}</Typography>
               </TableCell>
-              <TableCell align="right">
+              <TableCell align="left">
                 <IconButton
                   color="error"
                   onClick={() => {

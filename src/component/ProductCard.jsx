@@ -13,8 +13,14 @@ import DeleteProductDialog from "./DeleteProductDialog";
 const ProductCard = (props) => {
   const navigate = useNavigate();
   return (
-    <Card sx={{ width: "25%", boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px" }}>
+    <Card
+      sx={{
+        width: "500px",
+        boxShadow: "rgba(0, 0, 0, 0.35) 0px 5px 15px",
+      }}
+    >
       <CardMedia
+        component="img"
         sx={{
           height: 500,
           width: "100%",
