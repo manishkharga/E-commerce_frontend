@@ -5,7 +5,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
-import { Chip, Stack } from "@mui/material";
+import { Chip, Stack, Tooltip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { fallbackImage } from "../constants/general.constants";
 import DeleteProductDialog from "./DeleteProductDialog";
@@ -28,11 +28,12 @@ const ProductCard = (props) => {
           objectFit: "cover",
         }}
         image={props?.image || fallbackImage}
-        title="Samsung"
+        title={`${props?.name} -${props?.brand}`}
         onClick={() => {
           navigate(`/product-detail/${props._id}`);
         }}
       />
+
       <CardContent>
         <Stack direction="row" justifyContent="space-between">
           <Typography gutterBottom variant="h5" component="div">
@@ -42,9 +43,13 @@ const ProductCard = (props) => {
           <Chip label={props.brand} color="secondary" variant="outlined" />
         </Stack>
 
-        <Typography>Price:${props.price}</Typography>
+        <Typography variant="h6">Rs.{props.price}</Typography>
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ height: "80px" }}
+        >
           {props.description}...
         </Typography>
       </CardContent>

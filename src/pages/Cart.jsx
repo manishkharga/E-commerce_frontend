@@ -17,15 +17,14 @@ const Cart = () => {
 
   const cartData = data?.data?.cartData;
 
+  const orderSummary = data?.data?.orderSummary;
+
   if (isPending) {
     return <CircularProgress />;
   }
 
   return (
     <>
-      <Typography variant="h3" sx={{ marginBottom: "2rem" }}>
-        Shopping cart
-      </Typography>
       {cartData?.length === 0 ? (
         <KeepShopping />
       ) : (
@@ -39,7 +38,7 @@ const Cart = () => {
           }}
         >
           <CartItemTable cartData={cartData} />
-          <OrderSummary />
+          <OrderSummary orderSummary={orderSummary} />
         </Box>
       )}
     </>

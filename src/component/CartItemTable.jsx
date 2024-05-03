@@ -14,12 +14,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import $axios from "../lib/axios/axios.instance";
-
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 const CartItemTable = ({ cartData }) => {
   const queryClient = useQueryClient();
 
@@ -79,16 +80,30 @@ const CartItemTable = ({ cartData }) => {
       {(removeSingleItemFromCartPending ||
         clearCartPending ||
         updateQuantityPending) && <LinearProgress color="success" />}
-      <Button
-        variant="contained"
-        color="error"
-        sx={{ textAlign: "right" }}
-        onClick={() => {
-          clearCart();
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
         }}
       >
-        clear cart
-      </Button>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <ShoppingCartOutlinedIcon sx={{ fontSize: "2rem", color: "green" }} />
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            Shopping Cart
+          </Typography>
+        </Stack>
+        <Button
+          variant="contained"
+          color="error"
+          sx={{ textAlign: "right" }}
+          onClick={() => {
+            clearCart();
+          }}
+        >
+          clear cart
+        </Button>
+      </Toolbar>
+
       <Table sx={{}} aria-label="simple table">
         <TableHead>
           <TableRow>
@@ -147,7 +162,7 @@ const CartItemTable = ({ cartData }) => {
                 </Stack>
               </TableCell>
               <TableCell align="left">
-                <Typography variant="body1">${item.unitPrice}</Typography>
+                <Typography variant="body1">Rs. {item.unitPrice}</Typography>
               </TableCell>
               <TableCell align="center">
                 <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -180,7 +195,7 @@ const CartItemTable = ({ cartData }) => {
               </TableCell>
               <TableCell align="center">
                 {" "}
-                <Typography variant="body1">{200}</Typography>
+                <Typography variant="body1">Rs. {item?.subTotal}</Typography>
               </TableCell>
               <TableCell align="left">
                 <IconButton

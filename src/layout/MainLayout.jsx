@@ -14,7 +14,7 @@ const MainLayout = () => {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          margin: "3rem 0",
+          margin: "5rem 0",
         }}
       >
         <Outlet />

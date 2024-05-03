@@ -53,6 +53,7 @@ const ProductDetail = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries("get-cart-item-count");
+      navigate("/cart");
     },
   });
 
@@ -103,7 +104,7 @@ const ProductDetail = () => {
         <Typography sx={{ textAlign: "justify" }}>
           {productDetail.description}
         </Typography>
-        <Typography variant="h6">Price: ${productDetail.price}</Typography>
+        <Typography variant="h6">Price: Rs.{productDetail.price}</Typography>
 
         <Chip
           variant="outlined"
