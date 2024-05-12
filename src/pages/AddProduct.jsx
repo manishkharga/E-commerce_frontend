@@ -12,31 +12,48 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { Formik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { productCategories } from "../constants/general.constants";
 import $axios from "../lib/axios/axios.instance";
 import addProductValidationSchema from "../validationSchema/add.product.validation.schema";
+import { useDispatch } from "react-redux";
+import {
+  openErrorSnackbar,
+  openSuccessSnackbar,
+} from "../store/slices/snackbarSlice";
+import axios from "axios";
 
 const AddProduct = () => {
+  const [productImage, setProductImage] = useState(null);
+  const [localUrl, setLocalUrl] = useState("");
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { isPending, mutate } = useMutation({
     mutationKey: ["add-product"],
     mutationFn: async (values) => {
+      console.log(values);
       return await $axios.post("/product/add", values);
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       navigate("/products");
+      dispatch(openSuccessSnackbar(res?.data?.message));
+    },
+    onError: (error) => {
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 
-  if (isPending) {
+  if (isPending || imageUploadLoading) {
     return <CircularProgress />;
   }
 
@@ -55,7 +72,35 @@ const AddProduct = () => {
             description: "",
           }}
           validationSchema={addProductValidationSchema}
-          onSubmit={(values) => {
+          onSubmit={async (values) => {
+            let imageUrl = null;
+
+            if (productImage) {
+              const cloudName = "dlkcko4n6";
+              const uploadPreset = "nepal_emart";
+
+              const data = new FormData();
+              data.append("file", productImage);
+              data.append("upload_preset", uploadPreset);
+              data.append("cloud_name", cloudName);
+
+              try {
+                setImageUploadLoading(true);
+                const response = await axios.post(
+                  `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                  data
+                );
+
+                imageUrl = response?.data?.secure_url;
+                setImageUploadLoading(false);
+              } catch (error) {
+                setImageUploadLoading(false);
+                console.log(error.message);
+              }
+            }
+
+            values.image = imageUrl;
+
             mutate(values);
           }}
         >
@@ -74,6 +119,25 @@ const AddProduct = () => {
               }}
             >
               <Typography variant="h5">Add Product</Typography>
+
+              {localUrl && (
+                <Stack sx={{ height: "250px" }}>
+                  <img src={localUrl} alt="" height="100%" />
+                </Stack>
+              )}
+
+              <FormControl>
+                <input
+                  type="file"
+                  onChange={(event) => {
+                    const file = event.target.files[0];
+
+                    setProductImage(file);
+
+                    setLocalUrl(URL.createObjectURL(file));
+                  }}
+                />
+              </FormControl>
 
               <FormControl fullWidth>
                 <TextField
