@@ -1,11 +1,16 @@
 import MinimumLayout from "../layout/MinimumLayout";
 import Register from "../pages/Register";
 import Login from "../pages/Login.jsx";
+import GuestGuard from "../guard/GuestGuard.jsx";
 
 const guestRoutes = [
   {
     path: "/",
-    element: <MinimumLayout />,
+    element: (
+      <GuestGuard>
+        <MinimumLayout />
+      </GuestGuard>
+    ),
     children: [
       {
         path: "login",
