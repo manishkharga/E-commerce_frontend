@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Checkbox,
-  CircularProgress,
   FormControl,
   FormControlLabel,
   FormHelperText,
@@ -10,18 +9,35 @@ import {
   LinearProgress,
   MenuItem,
   Select,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { Formik } from "formik";
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import addProductValidationSchema from "../validationSchema/add.product.validation.schema";
-import { productCategories } from "../constants/general.constants";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Formik } from "formik";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  fallbackImage,
+  productCategories,
+} from "../constants/general.constants";
 import $axios from "../lib/axios/axios.instance";
+import {
+  openErrorSnackbar,
+  openSuccessSnackbar,
+} from "../store/slices/snackbarSlice";
+import addProductValidationSchema from "../validationSchema/add.product.validation.schema";
+import Loader from "../component/Loader";
 
 const EditProduct = () => {
+  const [productImage, setProductImage] = useState(null);
+  const [localUrl, setLocalUrl] = useState("");
+
+  const [imageUploadLoading, setImageUploadLoading] = useState(false);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const params = useParams();
 
@@ -45,18 +61,18 @@ const EditProduct = () => {
     },
     onSuccess: (res) => {
       navigate(`/product-detail/${productId}`);
+      dispatch(openSuccessSnackbar(res?.data?.message));
     },
     onError: (error) => {
-      console.log(error?.response?.data?.message);
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 
-  if (isPending) {
-    return <CircularProgress />;
+  if (isPending || imageUploadLoading || editProductPending) {
+    return <Loader />;
   }
   return (
     <Box>
-      {editProductPending && <LinearProgress color="success" />}
       <Formik
         enableReinitialize
         initialValues={{
@@ -70,7 +86,38 @@ const EditProduct = () => {
           description: productDetail?.description || "",
         }}
         validationSchema={addProductValidationSchema}
-        onSubmit={(values) => {
+        onSubmit={async (values) => {
+          let imageUrl = null;
+          if (productImage) {
+            const cloudName = "dlkcko4n6";
+            const uploadPreset = "nepal_emart";
+
+            const data = new FormData();
+
+            data.append("file", productImage);
+            data.append("cloud_name", cloudName);
+            data.append("upload_preset", uploadPreset);
+
+            try {
+              setImageUploadLoading(true);
+              const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                data
+              );
+
+              console.log(response);
+
+              setImageUploadLoading(false);
+
+              imageUrl = response?.data?.secure_url;
+            } catch (error) {
+              setImageUploadLoading(false);
+
+              console.log(error.message);
+            }
+          }
+
+          values.image = imageUrl;
           mutate(values);
         }}
       >
@@ -89,6 +136,25 @@ const EditProduct = () => {
             }}
           >
             <Typography variant="h5">Edit Product</Typography>
+
+            <Stack sx={{ height: "250px" }}>
+              <img
+                src={localUrl || productDetail?.image || fallbackImage}
+                alt=""
+                height="100%"
+              />
+            </Stack>
+
+            <FormControl>
+              <input
+                type="file"
+                onChange={(event) => {
+                  const file = event.target.files[0];
+                  setProductImage(file);
+                  setLocalUrl(URL.createObjectURL(file));
+                }}
+              />
+            </FormControl>
 
             <FormControl fullWidth>
               <TextField
@@ -151,7 +217,6 @@ const EditProduct = () => {
                 }
                 label="Free Shipping"
               />
-              {console.log(formik.values)}
             </FormControl>
             <FormControl fullWidth required>
               <InputLabel>Category</InputLabel>

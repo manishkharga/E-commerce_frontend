@@ -17,9 +17,15 @@ import DeleteProductDialog from "../component/DeleteProductDialog";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import Loader from "../component/Loader";
+import { useDispatch } from "react-redux";
+import {
+  openErrorSnackbar,
+  openSuccessSnackbar,
+} from "../store/slices/snackbarSlice";
 // Box => div
 // Stack => div which has display flex and direction column
 const ProductDetail = () => {
+  const dispatch = useDispatch();
   const [orderedQuantity, setOrderedQuantity] = useState(1);
 
   const navigate = useNavigate();
@@ -51,9 +57,13 @@ const ProductDetail = () => {
       });
     },
 
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries("get-cart-item-count");
       navigate("/cart");
+      dispatch(openSuccessSnackbar(res?.data?.message));
+    },
+    onError: (error) => {
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 

@@ -16,9 +16,16 @@ import {
   TextField,
 } from "@mui/material";
 import { productCategories } from "../constants/general.constants";
+import { useDispatch, useSelector } from "react-redux";
+import { setFilter } from "../store/slices/productSlice";
 
 const ProductFilterDialog = () => {
   const [open, setOpen] = React.useState(false);
+
+  const { category, minPrice, maxPrice } = useSelector(
+    (state) => state.product
+  );
+  const dispatch = useDispatch();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -38,13 +45,13 @@ const ProductFilterDialog = () => {
         <DialogContent>
           <Formik
             initialValues={{
-              category: "",
-              minPrice: 0,
-              maxPrice: 0,
+              category: category,
+              minPrice: minPrice,
+              maxPrice: maxPrice,
             }}
             validationSchema={productFilterValidationSchema}
             onSubmit={(values) => {
-              console.log(values);
+              dispatch(setFilter(values));
             }}
           >
             {(formik) => (

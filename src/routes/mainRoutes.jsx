@@ -1,7 +1,9 @@
+import AuthGuard from "../guard/AuthGuard";
 import MainLayout from "../layout/MainLayout";
 import About from "../pages/About";
 import AddProduct from "../pages/AddProduct";
 import Cart from "../pages/Cart";
+import DatePickerForm from "../pages/DatePickerForm";
 import EditProduct from "../pages/EditProduct";
 import Home from "../pages/Home";
 import ProductDetail from "../pages/ProductDetail";
@@ -10,7 +12,11 @@ import ProductList from "../pages/ProductList";
 const mainRoutes = [
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <AuthGuard>
+        <MainLayout />
+      </AuthGuard>
+    ),
     children: [
       {
         path: "home",
@@ -40,6 +46,7 @@ const mainRoutes = [
         path: "cart",
         element: <Cart />,
       },
+      { path: "date-picker", element: <DatePickerForm /> },
     ],
   },
 ];

@@ -21,7 +21,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import $axios from "../lib/axios/axios.instance";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import { useDispatch } from "react-redux";
+import { openErrorSnackbar } from "../store/slices/snackbarSlice";
 const CartItemTable = ({ cartData }) => {
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
 
   //   clear cart api
@@ -33,6 +36,9 @@ const CartItemTable = ({ cartData }) => {
     onSuccess: () => {
       // re-hit get cart item list api
       queryClient.invalidateQueries("get-cart-item-list");
+    },
+    onError: (error) => {
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 
@@ -48,6 +54,9 @@ const CartItemTable = ({ cartData }) => {
     onSuccess: () => {
       // re-hit get cart item list api
       queryClient.invalidateQueries("get-cart-item-list");
+    },
+    onError: (error) => {
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 
@@ -65,6 +74,9 @@ const CartItemTable = ({ cartData }) => {
       },
       onSuccess: () => {
         queryClient.invalidateQueries("get-cart-item-list");
+      },
+      onError: (error) => {
+        dispatch(openErrorSnackbar(error?.response?.data?.message));
       },
     });
 

@@ -14,9 +14,12 @@ import $axios from "../lib/axios/axios.instance";
 import { loginValidationSchema } from "../validationSchema/login.validation.schema";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { openErrorSnackbar } from "../store/slices/snackbarSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const { isPending, mutate } = useMutation({
     mutationKey: ["login-user"],
@@ -38,7 +41,7 @@ const Login = () => {
       localStorage.setItem("role", role);
     },
     onError: (error) => {
-      console.log(error.response.data.message);
+      dispatch(openErrorSnackbar(error?.response?.data?.message));
     },
   });
 
